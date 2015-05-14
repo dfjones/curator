@@ -18,16 +18,6 @@
  */
 package org.apache.curator.framework.recipes.leader;
 
-import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableList;
-import com.google.common.util.concurrent.MoreExecutors;
-import org.apache.curator.framework.CuratorFramework;
-import org.apache.curator.framework.recipes.locks.InterProcessMutex;
-import org.apache.curator.utils.ThreadUtils;
-import org.apache.zookeeper.KeeperException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import java.io.Closeable;
 import java.io.UnsupportedEncodingException;
 import java.util.Collection;
@@ -38,6 +28,18 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
+
+import org.apache.curator.framework.CuratorFramework;
+import org.apache.curator.framework.recipes.locks.InterProcessMutex;
+import org.apache.curator.utils.ThreadUtils;
+import org.apache.zookeeper.KeeperException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableList;
+import com.google.common.util.concurrent.MoreExecutors;
 
 /**
  * <p>
@@ -65,6 +67,7 @@ public class LeaderSelector implements Closeable
     private final AtomicReference<State>    state = new AtomicReference<State>(State.LATENT);
     private final AtomicBoolean             autoRequeue = new AtomicBoolean(false);
 
+    protected volatile boolean interrupt = false;
     private volatile boolean                hasLeadership;
     private volatile String                 id = "";
 
@@ -322,6 +325,9 @@ public class LeaderSelector implements Closeable
         hasLeadership = false;
         try
         {
+          if (interrupt) {
+            Thread.currentThread().interrupt();
+          }
             mutex.acquire();
 
             hasLeadership = true;

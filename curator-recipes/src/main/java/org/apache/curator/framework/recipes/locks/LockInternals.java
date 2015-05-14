@@ -18,21 +18,6 @@
  */
 package org.apache.curator.framework.recipes.locks;
 
-import com.google.common.base.Function;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
-import org.apache.curator.RetryLoop;
-import org.apache.curator.framework.CuratorFramework;
-import org.apache.curator.framework.api.CuratorWatcher;
-import org.apache.curator.framework.imps.CuratorFrameworkState;
-import org.apache.curator.utils.ZKPaths;
-import org.apache.zookeeper.CreateMode;
-import org.apache.zookeeper.KeeperException;
-import org.apache.zookeeper.WatchedEvent;
-import org.apache.zookeeper.Watcher;
-import org.apache.curator.utils.PathUtils;
-import org.apache.zookeeper.data.Stat;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -40,6 +25,23 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
+
+import org.apache.curator.RetryLoop;
+import org.apache.curator.framework.CuratorFramework;
+import org.apache.curator.framework.api.CuratorWatcher;
+import org.apache.curator.framework.imps.CuratorFrameworkState;
+import org.apache.curator.utils.PathUtils;
+import org.apache.curator.utils.ZKPaths;
+import org.apache.zookeeper.CreateMode;
+import org.apache.zookeeper.KeeperException;
+import org.apache.zookeeper.WatchedEvent;
+import org.apache.zookeeper.Watcher;
+import org.apache.zookeeper.data.Stat;
+
+import com.google.common.base.Function;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 
 public class LockInternals
 {

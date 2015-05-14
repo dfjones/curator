@@ -18,8 +18,15 @@
  */
 package org.apache.curator.framework.recipes.leader;
 
-import com.google.common.collect.Lists;
-import com.google.common.io.Closeables;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
+
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
 import org.apache.curator.framework.recipes.BaseClassForTests;
@@ -30,55 +37,15 @@ import org.apache.curator.test.Timing;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import org.testng.internal.annotations.Sets;
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.Semaphore;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
+
+import com.google.common.collect.Lists;
+import com.google.common.io.Closeables;
 
 public class TestLeaderSelector extends BaseClassForTests
 {
     private static final String     PATH_NAME = "/one/two/me";
 
-    @Test
-    public void     testAutoRequeue() throws Exception
-    {
-        LeaderSelector      selector = null;
-        CuratorFramework    client = CuratorFrameworkFactory.builder().connectString(server.getConnectString()).retryPolicy(new RetryOneTime(1)).sessionTimeoutMs(1000).build();
-        try
-        {
-            client.start();
 
-            final Semaphore             semaphore = new Semaphore(0);
-            LeaderSelectorListener      listener = new LeaderSelectorListener()
-            {
-                @Override
-                public void takeLeadership(CuratorFramework client) throws Exception
-                {
-                    Thread.sleep(10);
-                    semaphore.release();
-                }
-
-                @Override
-                public void stateChanged(CuratorFramework client, ConnectionState newState)
-                {
-                }
-            };
-            selector = new LeaderSelector(client, "/leader", listener);
-            selector.autoRequeue();
-            selector.start();
-            
-            Assert.assertTrue(semaphore.tryAcquire(2, 10, TimeUnit.SECONDS));
-        }
-        finally
-        {
-            Closeables.closeQuietly(selector);
-            Closeables.closeQuietly(client);
-        }
-    }
     
     @Test
     public void     testServerDying() throws Exception
