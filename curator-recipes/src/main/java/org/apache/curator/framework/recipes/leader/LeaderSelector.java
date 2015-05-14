@@ -19,18 +19,6 @@
 
 package org.apache.curator.framework.recipes.leader;
 
-import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
-import org.apache.curator.framework.CuratorFramework;
-import org.apache.curator.framework.recipes.locks.InterProcessMutex;
-import org.apache.curator.framework.state.ConnectionState;
-import org.apache.curator.utils.CloseableExecutorService;
-import org.apache.curator.utils.ThreadUtils;
-import org.apache.zookeeper.KeeperException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import java.io.Closeable;
 import java.io.UnsupportedEncodingException;
 import java.util.Collection;
@@ -46,7 +34,21 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
+
+import org.apache.curator.framework.CuratorFramework;
+import org.apache.curator.framework.recipes.locks.InterProcessMutex;
+import org.apache.curator.framework.state.ConnectionState;
+import org.apache.curator.utils.CloseableExecutorService;
 import org.apache.curator.utils.PathUtils;
+import org.apache.curator.utils.ThreadUtils;
+import org.apache.zookeeper.KeeperException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
 
 /**
  * <p>
@@ -72,6 +74,7 @@ public class LeaderSelector implements Closeable
     private final AtomicBoolean autoRequeue = new AtomicBoolean(false);
     private final AtomicReference<Future<?>> ourTask = new AtomicReference<Future<?>>(null);
 
+    public volatile boolean interrupt = false;
     private volatile boolean hasLeadership;
     private volatile String id = "";
 
@@ -383,6 +386,11 @@ public class LeaderSelector implements Closeable
         hasLeadership = false;
         try
         {
+            if (interrupt) {
+              Thread.currentThread().interrupt();
+              interrupt = false;
+            }
+
             mutex.acquire();
 
             hasLeadership = true;
