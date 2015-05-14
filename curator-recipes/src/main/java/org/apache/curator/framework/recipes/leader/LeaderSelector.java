@@ -327,6 +327,7 @@ public class LeaderSelector implements Closeable
         {
           if (interrupt) {
             Thread.currentThread().interrupt();
+            interrupt = false;
           }
             mutex.acquire();
 
